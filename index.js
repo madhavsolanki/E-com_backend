@@ -3,7 +3,10 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import connectDB from './config/dbConnection.config.js';
 import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import addressRoutes from "./routes/address.routes.js";
 
+// Load environment variables from .env file int
 dotenv.config();
 
 const app = express();
@@ -22,6 +25,8 @@ app.use(express.urlencoded({ extended: true }));
 connectDB();
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/address", addressRoutes);
 
 // Server listening 
 app.listen(PORT, () => {

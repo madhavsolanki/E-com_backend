@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
 const userSchema = mongoose.Schema({
   firstName : {
@@ -18,7 +17,8 @@ const userSchema = mongoose.Schema({
   email:{
     type:String,
     required:true,
-    unique:true
+    unique:true,
+    lowercase:true
   },
   phoneNumber:{
     type:String,
@@ -46,21 +46,25 @@ const userSchema = mongoose.Schema({
     type:String,
   },
 
-});
+  addressBook:[{
+    ref:"Address",
+    type:mongoose.Schema.Types.ObjectId,
+  }],
 
-userSchema.pre("save", async function(next){
-  if(!this.isModified("password")){
-    return next();
+  defaultAddress: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Address"
+  },
+
+  profilePicUrl:{
+    type:String,
+    default:"https://res.cloudinary.com/drugllfyb/image/upload/v1745389662/tllvnenyn76gk6zuuy8a.jpg",
+  },
+  profilePublicId:{
+    type:String,
+    default:"E-com Market/user_profile_images/tllvnenyn76gk6zuuy8a"
   }
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(this.password, salt);
-  this.password = hashedPassword;
-  next();
-});
-
-userSchema.methods.matchPassword = async function(enterdPassword){
-  return await bcrypt.compare(enterdPassword, this.password);
-}
+},{timestamps:true});
 
 
 const User = mongoose.model("User", userSchema);

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import bcrypt, { compareSync } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.utils.js";
@@ -26,16 +26,21 @@ export const registerController = async (req, res) => {
       });
     }
 
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     // 4. Create new user (password gets hashed by user model's pre-save hook)
-    const user = await User.create({
+    const user = new User({
       firstName,
       lastName,
       username,
       email,
       phoneNumber,
-      password,
+      password : hashedPassword,
     });
 
+    await user.save();
     // 6. Send a success response
     return res.status(201).json({
       success: true,
@@ -175,9 +180,10 @@ export const loginController = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password are required." });
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required.",
+      });
     }
 
     const user = await User.findOne({ email });
@@ -196,8 +202,7 @@ export const loginController = async (req, res) => {
       });
     }
 
-    const isPasswordValid = await user.matchPassword(password);
-
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -207,12 +212,11 @@ export const loginController = async (req, res) => {
 
     const token = generateToken(user._id);
 
-    // Set token in HTTP only Cookies
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({
@@ -354,3 +358,27 @@ export const resetPasswordController = async (req, res) => {
     });
   }
 }
+
+export const logoutUserController = async ( req, res ) => {
+  try {
+    // Clear the token from cookies
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully",
+    });
+
+  } catch (error) {
+    console.error("Logout error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed",
+    });
+  }
+} 
+
