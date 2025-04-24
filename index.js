@@ -5,6 +5,8 @@ import connectDB from './config/dbConnection.config.js';
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import addressRoutes from "./routes/address.routes.js";
+import productRoutes from "./routes/product.routes.js";
+import categoryRoutes from "./routes/category.routes.js";
 
 // Load environment variables from .env file int
 dotenv.config();
@@ -24,9 +26,14 @@ app.use(express.urlencoded({ extended: true }));
 // Db connection
 connectDB();
 
+// APIS
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/address", addressRoutes);
+app.use("/api/v1/product", productRoutes);
+app.use("/api/v1/category", categoryRoutes);
+
+
 
 // Server listening 
 app.listen(PORT, () => {
