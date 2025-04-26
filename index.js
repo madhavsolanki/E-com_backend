@@ -7,6 +7,7 @@ import userRoutes from "./routes/user.routes.js";
 import addressRoutes from "./routes/address.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
+import brandRoutes from "./routes/brand.routes.js";
 
 // Load environment variables from .env file int
 dotenv.config();
@@ -32,6 +33,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/address", addressRoutes);
 app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/category", categoryRoutes);
+app.use("/api/v1/brand", brandRoutes);
 
 
 
